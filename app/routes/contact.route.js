@@ -1,14 +1,20 @@
 const express = require("express");
-const contacts = require("../controllers/contact.controller");
+const path = require("path");
+const contacts = require(path.join(__dirname, "../controllers/contact.controller"));
 
 const router = express.Router();
 
-router.post("/", contacts.create);
-router.get("/", contacts.findAll);
-router.get("/favorite", contacts.findAllFavorite);
-router.get("/:id", contacts.findOne);
-router.put("/:id", contacts.update);
-router.delete("/:id", contacts.delete);
-router.delete("/", contacts.deleteAll);
+router.route("/")
+    .get(contacts.findAll)
+    .post(contacts.create)
+    .delete(contacts.deleteAll);
+
+router.route("/favorite")
+    .get(contacts.findAllFavorite);
+
+router.route("/:id")   
+    .get(contacts.findOne)
+    .put(contacts.update)
+    .delete(contacts.delete);
 
 module.exports = router;

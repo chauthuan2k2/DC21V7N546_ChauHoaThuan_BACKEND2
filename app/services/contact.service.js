@@ -12,6 +12,7 @@ class ContactService {
             address: payload.address,
             phone: payload.phone,
             favorite: payload.favorite,
+            job: payload.job,
         };
         Object.keys(contact).forEach(
             (key) => contact[key] === undefined && delete contact[key]
@@ -36,25 +37,33 @@ class ContactService {
         });
     }
 
-    async findById(id) {
-        return await this.Contact.findOne({
-            _id: ObjectId.isValid(id) ? new ObjectId(id) : null,
-        });
-    }
+async findById(id) {
+    return await this.Contact.findOne({
+        _id: ObjectId.isValid(id) ? new ObjectId(id) : null,
+    });
+}
 
-    async update(id, payload) {
+ async update(id, payload) {
+        // 1. Chỉ lấy các trường dữ liệu hợp lệ
         const filter = {
             _id: ObjectId.isValid(id) ? new ObjectId(id) : null,
-    };
-    const update = this.extractContactData(payload);
-    const result = await this.Contact.findOneAndUpdate(
-     filter,
-     { $set: update },
-     { returnDocument: "after" }
-    );
-    return result.value; //return result;
-
+        };
+        const updateData = this.extractContactData(payload);
+        
+        // 2. Thực hiện cập nhật bằng findOneAndUpdate
+        const result = await this.Contact.findOneAndUpdate(
+            filter, // Điều kiện tìm kiếm (theo ID)
+            { $set: updateData }, // Dữ liệu cần cập nhật
+            { 
+                returnDocument: "after" // QUAN TRỌNG: Trả về đối tượng SAU KHI cập nhật
+            }
+        );
+        
+        // 3. Hàm findOneAndUpdate trả về { value: contact, ok: 1 }
+        // Trả về đối tượng liên hệ (hoặc null nếu không tìm thấy)
+        return result.value; 
     }
+
     async delete(id) {
         const result = await this.Contact.findOneAndDelete({
         _id: ObjectId.isValid(id) ? new ObjectId(id) : null,
